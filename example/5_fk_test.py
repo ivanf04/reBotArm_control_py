@@ -37,47 +37,45 @@ from reBotArm_control_py.kinematics import (
 def print_welcome(model, joint_names) -> None:
     n = get_joint_count()
     print("=" * 52)
-    print("  reBotArm 正运动学测试 / Forward Kinematics Test")
+    print("  reBotArm Forward Kinematics Test")
     print("=" * 52)
-    print(f"  机器人 / Robot  : {model.name}")
-    print(f"  关节    / Joints: {joint_names[:n]}")
-    print(f"  nq = {model.nq} (URDF), 控制前 {n} 个关节 / controlling first {n} joints")
+    print(f"  Robot  : {model.name}")
+    print(f"  Joints: {joint_names[:n]}")
+    print(f"  nq = {model.nq} (URDF), controlling first {n} joints")
     print()
-    print(f"  输入 {n} 个关节角度（度），空格分隔 / Enter {n} joint angles (deg), space-separated")
+    print(f"  Enter {n} joint angles (deg), space-separated")
     print("-" * 52)
     print("> ", end="", flush=True)
 
 def print_result(q_deg, position, rotation, euler_deg) -> None:
     print()
     print("=" * 52)
-    print("  结果 / Result")
+    print("  Result")
     print("=" * 52)
-    print(f"  关节角度 (度) / Joint angles (deg): {q_deg}")
+    print(f"  Joint angles (deg): {q_deg}")
     print()
-    print(f"  末端位置 (m) / End-effector position (m):")
+    print(f"  End-effector position (m):")
     print(f"    X = {position[0]:+.6f}")
     print(f"    Y = {position[1]:+.6f}")
     print(f"    Z = {position[2]:+.6f}")
     print()
-    print(f"  旋转矩阵 (R_world^end) / Rotation matrix (R_world^end):")
+    print(f"  Rotation matrix (R_world^end):")
     for row in rotation:
         print(f"    [{row[0]:+.6f}  {row[1]:+.6f}  {row[2]:+.6f}]")
     print()
-    print(f"  欧拉角 XYZ (横滚, 俯仰, 偏航) [度] / Euler XYZ (roll, pitch, yaw) [deg]:")
-    print(f"    横滚/roll  = {euler_deg[0]:+.4f}")
-    print(f"    俯仰/pitch = {euler_deg[1]:+.4f}")
-    print(f"    偏航/yaw   = {euler_deg[2]:+.4f}")
+    print(f"  Euler XYZ (roll, pitch, yaw) [deg]:")
+    print(f"    roll  = {euler_deg[0]:+.4f}")
+    print(f"    pitch = {euler_deg[1]:+.4f}")
+    print(f"    yaw   = {euler_deg[2]:+.4f}")
 
 def parse_joint_input(line: str, n: int) -> np.ndarray:
     tokens = line.split()
     if len(tokens) != n:
-        print(f"错误: 需要 {n} 个值，输入了 {len(tokens)} 个")
         print(f"Error: need {n} values, got {len(tokens)}")
         sys.exit(1)
     try:
         q_deg = [float(x) for x in tokens]
     except ValueError as e:
-        print(f"错误: 无法解析数字 — {e}")
         print(f"Error: cannot parse number — {e}")
         sys.exit(1)
     return np.radians(q_deg)
@@ -107,7 +105,7 @@ def main() -> None:
     try:
         line = input().strip()
     except EOFError:
-        print("无输入，退出。/ No input, exit.")
+        print("No input, exiting.")
         return
 
     q_rad = parse_joint_input(line, n_joints)

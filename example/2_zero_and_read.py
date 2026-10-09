@@ -30,10 +30,10 @@ from reBotArm_control_py.actuator import RebotArm
 
 _hw_yaml = sys.argv[1] if len(sys.argv) > 1 else None
 rebotarm = RebotArm(_hw_yaml)
-print(f"[{rebotarm.hardware_yaml}] 使用配置:")
+print(f"[{rebotarm.hardware_yaml}] Using config:")
 print(f"[{rebotarm.hardware_yaml}] Using config: {rebotarm.hardware_yaml}")
 rebotarm.connect()
-print("--- 连接成功 ---")
+print("--- Connected successfully ---")
 print("--- Connection OK ---\n")
 
 # 后台反馈线程：零点校准约需 20s，期间实时打印进度，避免误以为卡死
@@ -45,7 +45,7 @@ _zeroing = True
 def _zero_progress() -> None:
     start = time.time()
     while _zeroing:
-        print(f"\r正在设置零点 / Setting zero... {time.time() - start:.0f}s",
+        print(f"\rSetting zero... {time.time() - start:.0f}s",
               end="", flush=True)
         time.sleep(1.0)
 
@@ -53,7 +53,7 @@ def _zero_progress() -> None:
 threading.Thread(target=_zero_progress, daemon=True).start()
 rebotarm.set_zero()
 _zeroing = False
-print("\r--- 零点已设置 ---" + " " * 30)
+print("\r--- Zero position set ---" + " " * 30)
 print("--- Zero set ---\n")
 
 n_arm = rebotarm.arm.num_joints
@@ -81,8 +81,8 @@ def fresh_controller(r: RebotArm, dt: float) -> None:
     )
 
 
-print("--- 随动模式 ---")
-print("实时角度（度）。按 Ctrl+C 退出。\n")
+print("--- Compliant mode ---")
+print("Live joint angles (degrees). Press Ctrl+C to exit.\n")
 print("--- Free-drive mode ---")
 print("Realtime angles (deg). Press Ctrl+C to exit.\n")
 rebotarm.arm.mode_mit()

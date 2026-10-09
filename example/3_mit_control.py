@@ -50,11 +50,11 @@ def mit_controller(r: RebotArm, dt: float) -> None:
 
 rebotarm.start_control_loop(mit_controller)
 
-print(f"关节数 / Joint count: {n_total} (arm={n_arm}, gripper={n_gripper}) | {rebotarm.rate}Hz")
-print(f"配置 / Config: {rebotarm.hardware_yaml}")
+print(f"Joint count: {n_total} (arm={n_arm}, gripper={n_gripper}) | {rebotarm.rate}Hz")
+print(f"Config: {rebotarm.hardware_yaml}")
 accepted_lengths = (n_arm, n_total) if n_gripper else (n_total,)
-accepted_hint = " 或 ".join(str(n) for n in accepted_lengths)
-print(f"命令 / Command: {accepted_hint}个角度(度)  q退出/exit  state查看状态/state\n")
+accepted_hint = " or ".join(str(n) for n in accepted_lengths)
+print(f"Command: {accepted_hint} joint angles (degrees); q to exit; state to view state\n")
 
 try:
     while True:
@@ -75,14 +75,13 @@ try:
 
         tokens = line.split()
         if len(tokens) not in accepted_lengths:
-            print(f"需要 {accepted_hint} 个值（{n_arm} 关节 + {n_gripper} 夹爪）")
             print(f"Need {accepted_hint} values ({n_arm} joints + {n_gripper} gripper)")
             continue
 
         try:
             pos_deg = [float(x) for x in tokens[:n_arm]]
         except ValueError:
-            print("输入必须是数字 / Values must be numbers")
+            print("Values must be numbers")
             continue
 
         gripper_deg: list[float] = []
@@ -90,7 +89,7 @@ try:
             try:
                 gripper_deg = [float(x) for x in tokens[n_arm:]]
             except ValueError:
-                print("输入必须是数字 / Values must be numbers")
+                print("Values must be numbers")
                 continue
 
         target_pos[:n_arm] = np.radians(pos_deg)

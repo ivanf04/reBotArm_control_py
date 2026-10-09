@@ -176,5 +176,5 @@ def compute_static_torque(
 def _check_acc_shape(model: pin.Model, a: np.ndarray, func_name: str) -> None:
     if a.shape != (model.nv,):
         raise ValueError(
-            f"{func_name}: 加速度 a 必须为形状 ({model.nv},)，实际为 {a.shape}"
+            f"{func_name}: acceleration a must have shape ({model.nv},), got {a.shape}"
         )

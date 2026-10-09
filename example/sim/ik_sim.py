@@ -38,7 +38,7 @@ def signal_handler(sig, frame):
 def main():
     signal.signal(signal.SIGINT, signal_handler)
 
-    print("加载可视化器...")
+    print("Loading visualizer...")
     viz = Visualizer()
 
     viz.neutral()
@@ -50,17 +50,17 @@ def main():
     end_joint = viz.model.joints[end_frame.parentJoint]
     arm_nq = end_joint.idx_q + end_joint.nq
 
-    print("MeshCat 已打开. 输入目标位姿:")
-    print("  x y z                      (仅位置，米)")
-    print("  x y z roll pitch yaw       (位置+姿态，弧度)")
-    print("  可达位姿示例: 0.29545 0 0.28664 0 0.17453 0")
-    print("  q/quit/exit: 退出\n")
+    print("MeshCat is open. Enter the target pose:")
+    print("  x y z                      (position only, meters)")
+    print("  x y z roll pitch yaw       (position+orientation, radians)")
+    print("  Example reachable pose: 0.29545 0 0.28664 0 0.17453 0")
+    print("  q/quit/exit: exit\n")
 
     while not should_exit:
         time.sleep(0.01)
 
         try:
-            line = input("目标位姿 > ").strip().lower()
+            line = input("Target pose > ").strip().lower()
         except EOFError:
             break
 
@@ -70,10 +70,10 @@ def main():
         try:
             vals = [float(x) for x in line.split()]
             if len(vals) not in (3, 6):
-                print("需要 3 个值（仅位置）或 6 个值（位置+姿态）\n")
+                print("Need 3 values (position only) or 6 values (position+orientation)\n")
                 continue
         except ValueError:
-            print("无效输入\n")
+            print("Invalid input\n")
             continue
 
         target_pos = np.array(vals[:3])  # 获取位置
@@ -88,33 +88,33 @@ def main():
             viz.update(result.q)
             # 后续目标从当前已到达构型继续求解，避免每次跳回零位。
             q_seed = result.q.copy()
-        status = "收敛" if result.success else "未收敛"
+        status = "Converged" if result.success else "Not converged"
         actual_pos, actual_rot, _ = compute_fk(viz.model, result.q)
         position_error = float(np.linalg.norm(target_pos - actual_pos))
 
         if target_rot is None:
             print(
-                f"  [{status}] 迭代={result.iterations} "
-                f"位置误差={position_error:.2e}m"
+                f"  [{status}] Iterations={result.iterations} "
+                f"Position error={position_error:.2e}m"
             )
         else:
             orientation_error = float(np.linalg.norm(pin.log3(actual_rot.T @ target_rot)))
             print(
-                f"  [{status}] 迭代={result.iterations} "
-                f"位置误差={position_error:.2e}m "
-                f"姿态误差={orientation_error:.2e}rad"
+                f"  [{status}] Iterations={result.iterations} "
+                f"Position error={position_error:.2e}m "
+                f"Orientation error={orientation_error:.2e}rad"
             )
-        print(f"  机械臂关节角度(deg): {np.degrees(result.q[:arm_nq])}\n")
+        print(f"  Arm joint angles (deg): {np.degrees(result.q[:arm_nq])}\n")
 
         if not result.success and target_rot is not None:
             position_result = compute_ik(q_seed, target_pos)
             if position_result.success:
                 _, reachable_rot, _ = compute_fk(viz.model, position_result.q)
                 reachable_rpy = pin.rpy.matrixToRpy(reachable_rot)
-                print("  该位置可达，但指定姿态在当前关节限位下不可达。")
-                print("  若只要求位置，请输入前 3 个值。")
+                print("  The position is reachable, but the requested orientation is unreachable within the current joint limits.")
+                print("  For position-only control, enter just the first 3 values.")
                 print(
-                    "  当前位置附近的可达 RPY(rad): "
+                    "  Reachable RPY near the current position (rad): "
                     f"{np.array2string(reachable_rpy, precision=5)}\n"
                 )
 

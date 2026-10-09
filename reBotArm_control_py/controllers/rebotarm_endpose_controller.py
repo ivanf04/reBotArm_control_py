@@ -95,7 +95,7 @@ class RebotArmEndPose:
         self._has_gripper = rebotarm.has_gripper
 
         if self._arm_group is None:
-            raise ValueError("配置中缺少 arm 组，请检查 groups 配置")
+            raise ValueError("Missing arm group in config; check the groups configuration")
 
         self._n = self._arm_group.num_joints
         self._dt = dt
@@ -212,7 +212,7 @@ class RebotArmEndPose:
         self._vlim_override = np.full(self._n, max_vel, dtype=np.float64)
         for i in range(num_steps):
             if time.monotonic() > deadline:
-                print("[safe_home] 轨迹发送超时")
+                print("[safe_home] Trajectory transmission timed out")
                 break
             self._q_target[:] = traj[i]
             time.sleep(interval)
@@ -250,7 +250,7 @@ class RebotArmEndPose:
             controlled_joints=self._n,
         )
         if not result.success:
-            print(f"[RebotArmEndPose/IK] IK 未收敛  err={result.error:.3e}")
+            print(f"[RebotArmEndPose/IK] IK did not converge  err={result.error:.3e}")
             return False
 
         self._q_target = result.q[:self._n].copy()
@@ -282,7 +282,7 @@ class RebotArmEndPose:
             controlled_joints=self._n,
         )
         if not ik_result.success:
-            print(f"[RebotArmEndPose/Traj] IK 失败  err={ik_result.error:.4f}")
+            print(f"[RebotArmEndPose/Traj] IK failed  err={ik_result.error:.4f}")
             return False
 
         q_end = ik_result.q
@@ -305,7 +305,7 @@ class RebotArmEndPose:
             null_gain=0.1,
         )
         if not joint_traj:
-            print("[RebotArmEndPose/Traj] 轨迹为空")
+            print("[RebotArmEndPose/Traj] Trajectory is empty")
             return False
 
         pts = [pt.q[: self._n].copy() for pt in joint_traj]

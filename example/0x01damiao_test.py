@@ -39,7 +39,7 @@ MODEL = "4340P"
 
 
 def signal_handler(sig, frame):
-    print("\n[ctrl+c] 退出 / exit")
+    print("\n[ctrl+c] exit")
     sys.exit(0)
 
 
@@ -47,22 +47,22 @@ def main() -> None:
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    print(f"连接到 {CHANNEL} ... / Connecting to {CHANNEL} ...")
+    print(f"Connecting to {CHANNEL} ...")
     if CHANNEL.startswith("/dev/tty"):
         ctrl = Controller.from_dm_serial(CHANNEL, 921600)
     else:
         ctrl = Controller(CHANNEL)
     motor = ctrl.add_damiao_motor(MOTOR_ID, FEEDBACK_ID, MODEL)
-    print(f"电机已注册 / Motor registered: id={MOTOR_ID:#04x} feedback={FEEDBACK_ID:#04x} model={MODEL}")
+    print(f"Motor registered: id={MOTOR_ID:#04x} feedback={FEEDBACK_ID:#04x} model={MODEL}")
 
     def do_enable() -> None:
         ctrl.enable_all()
         time.sleep(0.3)
-        print("电机已使能 / Motor enabled")
+        print("Motor enabled")
 
     def do_disable() -> None:
         ctrl.disable_all()
-        print("电机已去使能 / Motor disabled")
+        print("Motor disabled")
 
     def do_set_zero() -> None:
         st = motor.get_state()
@@ -73,7 +73,7 @@ def main() -> None:
                 break
             time.sleep(0.05)
         motor.set_zero_position()
-        print("软件零位已设置 / Software zero position set")
+        print("Software zero position set")
 
     pv_pos_kp = 150.0
     pv_pos_ki = 0.5
@@ -83,12 +83,12 @@ def main() -> None:
     def do_mode(args: list) -> None:
         nonlocal pv_pos_kp, pv_pos_ki, pv_vel_kp, pv_vel_ki
         if not args:
-            print("用法 / Usage: mode <mit|posvel|vel> [pos_kp] [pos_ki] [vel_kp] [vel_ki]")
+            print("Usage: mode <mit|posvel|vel> [pos_kp] [pos_ki] [vel_kp] [vel_ki]")
             return
         m = args[0].lower()
         if m == "mit":
             motor.ensure_mode(Mode.MIT, 1000)
-            print("切换到 MIT 模式 / Switched to MIT mode")
+            print("Switched to MIT mode")
         elif m == "posvel":
             if len(args) >= 5:
                 pv_pos_kp = float(args[1])
@@ -100,15 +100,15 @@ def main() -> None:
             motor.write_register_f32(27, pv_pos_kp)  # KP_APR   位置环 Kp / Position loop Kp
             motor.write_register_f32(28, pv_pos_ki)  # KI_APR   位置环 Ki / Position loop Ki
             time.sleep(0.02)
-            print(f"PID 参数已写入 / PID params written: pos_kp={pv_pos_kp} pos_ki={pv_pos_ki} "
+            print(f"PID params written: pos_kp={pv_pos_kp} pos_ki={pv_pos_ki} "
                   f"vel_kp={pv_vel_kp} vel_ki={pv_vel_ki}")
             motor.ensure_mode(Mode.POS_VEL, 1000)
-            print("切换到 POS_VEL 模式 / Switched to POS_VEL mode")
+            print("Switched to POS_VEL mode")
         elif m == "vel":
             motor.ensure_mode(Mode.VEL, 1000)
-            print("切换到 VEL 模式 / Switched to VEL mode")
+            print("Switched to VEL mode")
         else:
-            print(f"未知模式 / Unknown mode: {m}，可用 / available: mit / posvel / vel")
+            print(f"Unknown mode: {m}, available: mit / posvel / vel")
 
     def do_state() -> None:
         st = None
@@ -120,7 +120,7 @@ def main() -> None:
             if st is not None and st.status_code == 0:
                 break
         if st is None:
-            print("无反馈数据 / No feedback data")
+            print("No feedback data")
             return
         print(f"pos={st.pos*180/3.14159:+.4f}deg  "
               f"vel={st.vel*180/3.14159:+.4f}deg/s  "
@@ -129,7 +129,7 @@ def main() -> None:
 
     def do_mit(args: list) -> None:
         if not args:
-            print("用法 / Usage: mit <pos_deg> [<vel> <kp> <kd> <tau>]")
+            print("Usage: mit <pos_deg> [<vel> <kp> <kd> <tau>]")
             return
         pos = float(args[0]) * 3.14159265358979 / 180.0
         vel = float(args[1]) if len(args) > 1 else 0.0
@@ -141,7 +141,7 @@ def main() -> None:
     def do_posvel(args: list) -> None:
         nonlocal pv_pos_kp, pv_pos_ki, pv_vel_kp, pv_vel_ki
         if not args:
-            print("用法 / Usage: posvel <pos_deg> [<vlim>] 或/or posvel <pos_deg> <vlim> <pos_kp> <pos_ki> <vel_kp> <vel_ki>")
+            print("Usage: posvel <pos_deg> [<vlim>] or posvel <pos_deg> <vlim> <pos_kp> <pos_ki> <vel_kp> <vel_ki>")
             return
         pos = float(args[0]) * 3.14159265358979 / 180.0
         vlim = float(args[1]) if len(args) > 1 else 2.0
@@ -154,14 +154,14 @@ def main() -> None:
             motor.write_register_f32(26, pv_vel_ki)  # KI_ASR   速度环 Ki / Velocity loop Ki
             motor.write_register_f32(27, pv_pos_kp)  # KP_APR   位置环 Kp / Position loop Kp
             motor.write_register_f32(28, pv_pos_ki)  # KI_APR   位置环 Ki / Position loop Ki
-            print(f"PID 参数已更新 / PID params updated: pos_kp={pv_pos_kp} pos_ki={pv_pos_ki} "
+            print(f"PID params updated: pos_kp={pv_pos_kp} pos_ki={pv_pos_ki} "
                   f"vel_kp={pv_vel_kp} vel_ki={pv_vel_ki}")
             time.sleep(0.02)
         motor.send_pos_vel(pos, vlim)
 
     def do_vel(args: list) -> None:
         if not args:
-            print("用法 / Usage: vel <vel_rad_s>")
+            print("Usage: vel <vel_rad_s>")
             return
         vel = float(args[0])
         motor.send_vel(vel)
@@ -177,8 +177,8 @@ def main() -> None:
         "vel": (do_vel, "<vel_rad_s>"),
     }
 
-    print("\n命令 / Commands: enable / disable / set_zero / mode / mit / posvel / vel / state / q")
-    print("提示 / Tip: mode 会自动在下一条控制指令前生效 / takes effect on the next control command\n")
+    print("\nCommands: enable / disable / set_zero / mode / mit / posvel / vel / state / q")
+    print("Tip: mode takes effect on the next control command\n")
 
     try:
         while True:
@@ -194,16 +194,16 @@ def main() -> None:
             args = parts[1:]
 
             if cmd in ("q", "quit", "exit"):
-                print("退出 / Quit")
+                print("Quit")
                 break
 
             if cmd not in COMMANDS:
-                print(f"未知命令 / Unknown command: {cmd}，可用 / available: {' / '.join(COMMANDS)}")
+                print(f"Unknown command: {cmd}, available: {' / '.join(COMMANDS)}")
                 continue
 
             fn, help_hint = COMMANDS[cmd]
             if help_hint and not args and fn in (do_mode, do_mit, do_posvel, do_vel):
-                print(f"用法 / Usage: {cmd} {help_hint}")
+                print(f"Usage: {cmd} {help_hint}")
                 continue
 
             try:
@@ -220,7 +220,7 @@ def main() -> None:
                 else:
                     fn()
             except Exception as e:
-                print(f"错误 / Error: {e}")
+                print(f"Error: {e}")
 
     finally:
         ctrl.disable_all()

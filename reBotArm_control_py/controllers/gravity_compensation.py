@@ -101,7 +101,7 @@ class GravityCompensation:
     def start(self) -> None:
         """连接总线、切 MIT、使能，并启动控制循环。"""
         if self._running:
-            raise RuntimeError("GravityCompensation 已在运行，请先调用 end()")
+            raise RuntimeError("GravityCompensation already running; call end() first")
 
         robot = self.rebotarm
         robot.connect()
@@ -124,12 +124,12 @@ class GravityCompensation:
                 if name in robot._motor_map:
                     robot._motor_map[name].enable()
             print(
-                f"[安全模式 / Safety mode] 仅使能电机 / Motors enabled: "
+                f"[Safety mode] Motors enabled: "
                 f"{self._enabled_joints}"
             )
         else:
             robot.enable_all()
-            print("[使能 / Enabled] 全部电机已使能 / All motors enabled")
+            print("[Enabled] All motors enabled")
 
         # Begin at the already-active position-hold gains.  The control
         # loop follows measured position while smoothly reducing these
@@ -264,7 +264,7 @@ class GravityCompensation:
         应在 ``end()`` 之后、``disconnect()`` 之前调用。
         """
         if self._hold_kp is None:
-            raise RuntimeError("safe_home() 需先调用 start()")
+            raise RuntimeError("Call start() before safe_home()")
         robot = self.rebotarm
         q_hold = robot.arm.get_positions().copy()
         n = robot.arm.num_joints
@@ -292,12 +292,12 @@ class GravityCompensation:
 
         deadline = time.monotonic() + timeout
         print(
-            f"[safe_home] 归零轨迹 / homing trajectory: "
+            f"[safe_home] homing trajectory: "
             f"{num_steps} steps @ {send_freq:.0f} Hz, {t_total:.1f}s"
         )
         for i in range(num_steps):
             if time.monotonic() > deadline:
-                print("[safe_home] 超时 / timeout")
+                print("[safe_home] timeout")
                 break
             s = (i + 1) / num_steps
             # Minimum-jerk: q(s) = q0 + Δq * (10s³ - 15s⁴ + 6s⁵)

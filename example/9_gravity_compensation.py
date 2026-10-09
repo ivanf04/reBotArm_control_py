@@ -54,7 +54,7 @@ _running = True
 
 def _sigint_handler(signum, frame):
     global _running
-    print("\n[gravity_comp] 收到 Ctrl+C，准备停止... / Received Ctrl+C, preparing to stop...")
+    print("\n[gravity_comp] Received Ctrl+C, preparing to stop...")
     _running = False
 
 
@@ -63,20 +63,18 @@ signal.signal(signal.SIGINT, _sigint_handler)
 
 def main() -> None:
     print("=" * 60)
-    print("  reBotArm 重力补偿演示")
     print("  reBotArm gravity compensation demo")
-    print("  预计行为 / Expected behavior: 机械臂维持位置不动，可以手动掰动至任何位置")
-    print("               The arm holds position and can be manually moved to any pose")
-    print("  Ctrl+C 停止并断开连接 / Ctrl+C to stop and disconnect")
+    print("  Expected behavior: the arm holds its position and can be repositioned by hand")
+    print("  Ctrl+C to stop and disconnect")
     print("=" * 60)
 
     model = load_dynamics_model()
     g_vec = get_default_gravity()
-    print(f"\n[模型 / Model] nq={model.nq}, nv={model.nv}")
-    print(f"[重力 / Gravity] {g_vec}  m/s²")
+    print(f"\n[Model] nq={model.nq}, nv={model.nv}")
+    print(f"[Gravity] {g_vec}  m/s²")
 
     gravity_cfg = load_gravity_compensation_config("basic")
-    print(f"[重补配置 / Gravity profile] basic: {gravity_cfg}")
+    print(f"[Gravity profile] basic: {gravity_cfg}")
 
     rebotarm = RebotArm()
     ctrl = GravityCompensation(
@@ -91,7 +89,7 @@ def main() -> None:
         log_every=int(gravity_cfg.get("log_every", 20)),
     )
     ctrl.start()
-    print(f"[控制循环 / Control loop] 启动 @ {rebotarm.rate} Hz")
+    print(f"[Control loop] Started @ {rebotarm.rate} Hz")
     print("-" * 60)
     print(f"{'step':>4}  tau_g (N·m)")
     print("-" * 60)
@@ -100,12 +98,12 @@ def main() -> None:
         while _running:
             time.sleep(0.01)
     finally:
-        print("\n[停止 / Stopping] 关闭控制循环... / Closing control loop...")
+        print("\n[Stopping] Closing control loop...")
         ctrl.end()
-        print("[归零 / Safe home] 最小jerk轨迹归零... / Minimum-jerk homing...")
+        print("[Safe home] Minimum-jerk homing...")
         ctrl.safe_home()
         rebotarm.disconnect()
-        print("[完成 / Done] 已安全归零并断开连接 / Safely homed and disconnected")
+        print("[Done] Safely homed and disconnected")
 
 
 if __name__ == "__main__":

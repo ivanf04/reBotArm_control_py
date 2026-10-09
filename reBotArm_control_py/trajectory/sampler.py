@@ -102,7 +102,7 @@ def plan_cartesian_geodesic_trajectory(
         :class:`CartesianTrajectoryResult`。
     """
     if duration <= 0.0:
-        raise ValueError("duration 必须 > 0")
+        raise ValueError("duration must be > 0")
     if params is None:
         params = TrajPlanParams()
 

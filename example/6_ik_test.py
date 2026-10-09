@@ -39,18 +39,18 @@ from reBotArm_control_py.kinematics.inverse_kinematics import IKParams
 
 def print_welcome(model, joint_names) -> None:
     print("=" * 52)
-    print("  reBotArm 逆运动学测试 / Inverse Kinematics Test")
+    print("  reBotArm Inverse Kinematics Test")
     print("=" * 52)
-    print(f"  机器人 / Robot: {model.name}")
-    print(f"  关节   / Joints: {joint_names}")
+    print(f"  Robot: {model.name}")
+    print(f"  Joints: {joint_names}")
     print()
-    print("  输入末端期望位姿 / Enter desired end-effector pose:")
-    print("    <x> <y> <z>                       (仅位置，米 / position only, meters)")
-    print("    <x> <y> <z> <roll> <pitch> <yaw>    (位置+姿态，度 / position+orientation, degrees)")
+    print("  Enter desired end-effector pose:")
+    print("    <x> <y> <z>                       (position only, meters)")
+    print("    <x> <y> <z> <roll> <pitch> <yaw>    (position+orientation, degrees)")
     print()
-    print("  示例 / Examples:")
-    print("    0.25 0.0 0.15                      (仅位置 / position only)")
-    print("    0.25 0.0 0.15 0 0 0                (位置+姿态 / position+orientation)")
+    print("  Examples:")
+    print("    0.25 0.0 0.15                      (position only)")
+    print("    0.25 0.0 0.15 0 0 0                (position+orientation)")
     print("-" * 52)
     print("> ", end="", flush=True)
 
@@ -58,18 +58,18 @@ def print_welcome(model, joint_names) -> None:
 def print_result(result, target_pos, target_rot, joint_names, n_joints: int) -> None:
     print()
     print("=" * 52)
-    print("  结果 / Result")
+    print("  Result")
     print("=" * 52)
-    print(f"  目标末端位置 / Target position   : [{target_pos[0]:+.4f}, {target_pos[1]:+.4f}, {target_pos[2]:+.4f}] m")
+    print(f"  Target position   : [{target_pos[0]:+.4f}, {target_pos[1]:+.4f}, {target_pos[2]:+.4f}] m")
     if target_rot is not None:
         euler_in = np.degrees(pin.rpy.matrixToRpy(target_rot))
-        print(f"  目标末端姿态 / Target orientation: [{euler_in[0]:+.2f}, {euler_in[1]:+.2f}, {euler_in[2]:+.2f}] deg")
+        print(f"  Target orientation: [{euler_in[0]:+.2f}, {euler_in[1]:+.2f}, {euler_in[2]:+.2f}] deg")
     print()
-    print(f"  收敛 / Converged  : {'是 / Yes' if result.success else '否 / No'}")
-    print(f"  迭代次数 / Iterations: {result.iterations}")
-    print(f"  位置误差 / Position error: {result.error:.2e} m")
+    print(f"  Converged  : {'Yes' if result.success else 'No'}")
+    print(f"  Iterations: {result.iterations}")
+    print(f"  Position error: {result.error:.2e} m")
     print()
-    print(f"  关节角度 (度) [前 {n_joints} 个控制关节] / Joint angles (deg) [first {n_joints} control joints]:")
+    print(f"  Joint angles (deg) [first {n_joints} control joints]:")
     for name, deg, rad in zip(joint_names[:n_joints], np.degrees(result.q[:n_joints]), result.q[:n_joints]):
         print(f"    {name:10s} = {deg:+8.4f} deg  ({rad:+.4f} rad)")
 
@@ -77,13 +77,11 @@ def print_result(result, target_pos, target_rot, joint_names, n_joints: int) -> 
 def parse_pose_input(line: str) -> tuple:
     tokens = line.split()
     if len(tokens) not in (3, 6):
-        print(f"错误: 需要 3 个值（仅位置）或 6 个值（位置+姿态），输入了 {len(tokens)} 个")
-        print(f"Error: need 3 values (pos only) or 6 values (pos+ori), got {len(tokens)}")
+        print(f"Error: need 3 values (position only) or 6 values (position+orientation), got {len(tokens)}")
         sys.exit(1)
     try:
         vals = [float(x) for x in tokens]
     except ValueError as e:
-        print(f"错误: 无法解析数字 — {e}")
         print(f"Error: cannot parse number — {e}")
         sys.exit(1)
 
@@ -109,7 +107,7 @@ def main() -> None:
     try:
         line = input().strip()
     except EOFError:
-        print("无输入，退出。/ No input, exit.")
+        print("No input, exiting.")
         return
 
     target_pos, target_rot = parse_pose_input(line)

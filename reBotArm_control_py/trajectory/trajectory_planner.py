@@ -67,7 +67,7 @@ def plan_joint_space_trajectory(
     from reBotArm_control_py.kinematics import compute_fk
 
     if duration <= 0.0:
-        raise ValueError("duration 必须 > 0")
+        raise ValueError("duration must be > 0")
     if params is None:
         params = TrajPlanParams()
     if ik_params is None:

@@ -27,7 +27,6 @@ def main() -> None:
     ctrl = RebotArmEndPose(rebotarm)
 
     ctrl.start()
-    print("--- 已启动末端位置控制器 ---\n")
     print("--- End-effector pose controller started ---\n")
 
     while True:
@@ -43,9 +42,9 @@ def main() -> None:
 
         if line.lower() == "state":
             q, _, _ = rebotarm.get_state()
-            print(f"  机械臂 / Arm (rad): {[f'{v:+.3f}' for v in q[:rebotarm.arm.num_joints]]}")
+            print(f"  Arm (rad): {[f'{v:+.3f}' for v in q[:rebotarm.arm.num_joints]]}")
             if rebotarm.has_gripper:
-                print(f"  夹爪 / Gripper (rad): {q[rebotarm.arm.num_joints]:+.3f}")
+                print(f"  Gripper (rad): {q[rebotarm.arm.num_joints]:+.3f}")
             continue
 
         if line.lower() == "end_state":
@@ -64,15 +63,15 @@ def main() -> None:
             try:
                 pos = float(parts[1])
                 ctrl.set_gripper_target(pos)
-                print(f"  夹爪 / Gripper -> {pos:.3f} rad")
+                print(f"  Gripper -> {pos:.3f} rad")
             except ValueError:
-                print("  用法 / Usage: g <pos>")
+                print("  Usage: g <pos>")
             continue
 
         try:
             vals = [float(v) for v in parts]
         except ValueError:
-            print("  格式 / Format: x y z [roll pitch yaw]")
+            print("  Format: x y z [roll pitch yaw]")
             continue
 
         x, y, z = vals[0], vals[1], vals[2]
@@ -86,7 +85,7 @@ def main() -> None:
               f"{'ok' if ok else 'failed'}")
 
     ctrl.end()
-    print("\n完成 / Done.")
+    print("\nDone.")
 
 
 if __name__ == "__main__":

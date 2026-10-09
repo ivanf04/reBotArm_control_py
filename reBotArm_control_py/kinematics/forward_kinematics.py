@@ -38,7 +38,7 @@ def compute_fk(
 
     if q.shape != (model.nq,):
         raise ValueError(
-            f"q 必须为形状 ({model.nq},)，实际为 {q.shape}"
+            f"q must have shape ({model.nq},), got {q.shape}"
         )
 
     pin.forwardKinematics(model, data, q)

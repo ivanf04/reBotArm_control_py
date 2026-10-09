@@ -56,7 +56,7 @@ _running = True
 def _sigint_handler(signum, frame) -> None:
     del signum, frame
     global _running
-    print("\n[gravity_lock] 收到 Ctrl+C，准备停止... / Preparing to stop...")
+    print("\n[gravity_lock] Received Ctrl+C, preparing to stop...")
     _running = False
 
 
@@ -312,46 +312,46 @@ class VelocityLockGravityCompensation(GravityCompensation):
 
 def main() -> None:
     print("=" * 68)
-    print("  reBotArm 重力补偿演示（RS 末端速度锁止版）")
+    print("  reBotArm gravity compensation demo (RS end-effector speed locking)")
     print("  reBotArm gravity compensation demo (RS EE velocity lock)")
     model = load_dynamics_model()
-    print(f"\n[模型 / Model] nq={model.nq}, nv={model.nv}")
-    print(f"[重力 / Gravity] {get_default_gravity()} m/s^2")
-    print(f"[末端帧 / EE frame] {get_end_effector_frame()}")
+    print(f"\n[Model] nq={model.nq}, nv={model.nv}")
+    print(f"[Gravity] {get_default_gravity()} m/s^2")
+    print(f"[EE frame] {get_end_effector_frame()}")
 
     robot = RebotArm()
     controller = VelocityLockGravityCompensation(robot)
     print(
-        "  释放阈值 / Release: "
+        "  Release threshold: "
         f"{controller._linear_release_threshold} m/s, "
         f"{controller._angular_release_threshold} rad/s"
     )
     print(
-        "  锁定阈值 / Re-lock: "
+        "  Re-lock threshold: "
         f"{controller._linear_lock_threshold} m/s, "
         f"{controller._angular_lock_threshold} rad/s "
         f"for {controller._lock_settle_duration}s"
     )
     print(
-        "  重力缩放 / Gravity scale: "
+        "  Gravity scale: "
         f"{controller._gravity_cfg.get('tau_scale', 1.0)}"
     )
-    print("  预计行为：静止时锁定；用力推动时跟随；停止后重新锁定")
-    print("  Ctrl+C 停止并安全归零 / Stop and safely return home")
+    print("  Expected behavior: locks while stationary; follows when pushed; re-locks after stopping")
+    print("  Ctrl+C to stop and safely return home")
     print("=" * 68)
     controller.start()
-    print(f"[控制循环 / Control loop] 启动 @ {robot.rate} Hz")
+    print(f"[Control loop] Started @ {robot.rate} Hz")
 
     try:
         while _running:
             time.sleep(0.01)
     finally:
-        print("\n[停止 / Stopping] 关闭控制循环...")
+        print("\n[Stopping] Closing control loop...")
         controller.end()
-        print("[归零 / Safe home] 最小 jerk 轨迹归零...")
+        print("[Safe home] Minimum-jerk homing...")
         controller.safe_home()
         robot.disconnect()
-        print("[完成 / Done] 已安全归零并断开连接")
+        print("[Done] Safely homed and disconnected")
 
 
 if __name__ == "__main__":

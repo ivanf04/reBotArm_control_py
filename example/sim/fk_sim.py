@@ -30,26 +30,26 @@ should_exit = False
 def signal_handler(sig, frame):
     global should_exit
     should_exit = True
-    print("\n退出.")
+    print("\nExiting.")
 
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
 
-    print("加载可视化器...")
+    print("Loading visualizer...")
     viz = Visualizer()
     n_arm = 6
     q = np.zeros(viz.nq)
     viz.update(q)
 
-    print("MeshCat 已打开. 输入 6 个 arm 关节角度（度）:")
-    print("  q/quit/exit: 退出\n")
+    print("MeshCat is open. Enter 6 arm joint angles (degrees):")
+    print("  q/quit/exit: exit\n")
 
     while not should_exit:
         time.sleep(0.01)
 
         try:
-            line = input("关节角度 > ").split("#", 1)[0].strip().lower()
+            line = input("Joint angles > ").split("#", 1)[0].strip().lower()
         except (EOFError, KeyboardInterrupt):
             break
 
@@ -62,10 +62,10 @@ def main():
         try:
             q_deg = [float(x) for x in line.split()]
             if len(q_deg) != n_arm:
-                print(f"需要 {n_arm} 个值（夹爪在仿真中保持 0）\n")
+                print(f"Need {n_arm} values (gripper stays at 0 in simulation)\n")
                 continue
         except ValueError:
-            print("无效输入\n")
+            print("Invalid input\n")
             continue
 
         q = np.zeros(viz.nq)
@@ -74,8 +74,8 @@ def main():
 
         pos, rot, _ = compute_fk(viz.model, q)
         euler = np.degrees(pin.rpy.matrixToRpy(rot))
-        print(f"  末端位置: [{pos[0]:+.4f}, {pos[1]:+.4f}, {pos[2]:+.4f}] m")
-        print(f"  末端姿态: [{euler[0]:+.2f}, {euler[1]:+.2f}, {euler[2]:+.2f}] deg\n")
+        print(f"  End-effector position: [{pos[0]:+.4f}, {pos[1]:+.4f}, {pos[2]:+.4f}] m")
+        print(f"  End-effector orientation: [{euler[0]:+.2f}, {euler[1]:+.2f}, {euler[2]:+.2f}] deg\n")
 
 
 if __name__ == "__main__":

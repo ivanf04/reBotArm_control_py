@@ -74,7 +74,7 @@ class Visualizer:
         self._viz.loadViewerModel()
 
         if open_browser:
-            print(f"MeshCat 地址: {self._meshcat_viz.url()}")
+            print(f"MeshCat URL: {self._meshcat_viz.url()}")
 
     @property
     def meshcat(self):
@@ -85,7 +85,7 @@ class Visualizer:
         """更新机器人显示位姿。q 可以是 list 或 np.ndarray。"""
         q = np.asarray(q)
         if q.shape != (self._model.nq,):
-            raise ValueError(f"q 必须为形状 ({self._model.nq},)，实际为 {q.shape}")
+            raise ValueError(f"q must have shape ({self._model.nq},), got {q.shape}")
         self._viz.display(q)
 
     def neutral(self) -> None:
@@ -252,7 +252,7 @@ class Visualizer:
             path: 末端位置序列 [[x,y,z], ...]（可选）
         """
         print(
-            f"[viz] 播放轨迹: {name}  点数={len(q_list)}  dt={dt:.3f}s",
+            f"[viz] Playing trajectory: {name}  Points={len(q_list)}  dt={dt:.3f}s",
             flush=True,
         )
 
@@ -267,5 +267,5 @@ class Visualizer:
                 self.draw_actual_path(visited)
             time.sleep(dt)
 
-        print(f"[viz] 轨迹 '{name}' 完毕", flush=True)
+        print(f"[viz] Trajectory '{name}' finished", flush=True)
         time.sleep(1.0)

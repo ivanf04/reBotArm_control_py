@@ -256,12 +256,12 @@ def compute_all_terms(
 def _check_q_shape(model: pin.Model, q: np.ndarray, func_name: str) -> None:
     if q.shape != (model.nq,):
         raise ValueError(
-            f"{func_name}: q 必须为形状 ({model.nq},)，实际为 {q.shape}"
+            f"{func_name}: q must have shape ({model.nq},), got {q.shape}"
         )
 
 
 def _check_v_shape(model: pin.Model, v: np.ndarray, func_name: str) -> None:
     if v.shape != (model.nv,):
         raise ValueError(
-            f"{func_name}: v 必须为形状 ({model.nv},)，实际为 {v.shape}"
+            f"{func_name}: v must have shape ({model.nv},), got {v.shape}"
         )

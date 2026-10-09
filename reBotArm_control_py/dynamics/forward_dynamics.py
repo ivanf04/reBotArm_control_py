@@ -129,5 +129,5 @@ def forward_dynamics_from_nle(
 def _check_tau_shape(model: pin.Model, tau: np.ndarray, func_name: str) -> None:
     if tau.shape != (model.nv,):
         raise ValueError(
-            f"{func_name}: tau 必须为形状 ({model.nv},)，实际为 {tau.shape}"
+            f"{func_name}: tau must have shape ({model.nv},), got {tau.shape}"
         )

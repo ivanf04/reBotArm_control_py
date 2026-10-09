@@ -43,9 +43,9 @@ def pos_vel_controller(r: RebotArm, dt: float) -> None:
 
 rebotarm.start_control_loop(pos_vel_controller)
 
-print(f"关节数 / Joint count: {n_total} (arm={n_arm}, gripper={n_gripper}) | {rebotarm.rate}Hz")
-gripper_hint = "（夹爪将忽略 / gripper will be ignored）" if n_gripper == 0 else ""
-print(f"命令 / Command: {n_total}个角度(度)  q退出/exit  state查看状态/state {gripper_hint}\n")
+print(f"Joint count: {n_total} (arm={n_arm}, gripper={n_gripper}) | {rebotarm.rate}Hz")
+gripper_hint = "(gripper will be ignored)" if n_gripper == 0 else ""
+print(f"Command: {n_total} joint angles (degrees); q to exit; state to view state {gripper_hint}\n")
 
 while True:
     try:
@@ -65,7 +65,6 @@ while True:
 
     tokens = line.split()
     if len(tokens) < n_total:
-        print(f"需要 {n_total} 个值（{n_arm} 关节 + {n_gripper} 夹爪）")
         print(f"Need {n_total} values ({n_arm} joints + {n_gripper} gripper)")
         continue
 

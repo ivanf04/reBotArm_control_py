@@ -642,7 +642,7 @@ class RebotArm:
 
     def add_group(self, name: str, joint_names: List[str]) -> JointGroup:
         if name in self._groups:
-            raise ValueError(f"组 {name!r} 已存在")
+            raise ValueError(f"Group {name!r} already exists")
         g = JointGroup(
             name=name,
             joint_names=joint_names,
@@ -778,7 +778,7 @@ class RebotArm:
             time.sleep(0.05)
         self._build_groups()
         time.sleep(post_setup_delay)
-        print("[reconnect] 控制器和电机已重新初始化")
+        print("[reconnect] Controller and motors reinitialized")
 
     # ── 控制循环 ────────────────────────────────────────────────────────
 
@@ -788,7 +788,7 @@ class RebotArm:
         rate: Optional[float] = None,
     ) -> None:
         if self.control_loop_active:
-            raise RuntimeError("控制循环已在运行，请先调用 stop_control_loop()")
+            raise RuntimeError("Control loop already running; call stop_control_loop() first")
         self._running = True
         self._ctrl_rate = rate if rate is not None else self._rate
         self._ctrl_fn = control_fn

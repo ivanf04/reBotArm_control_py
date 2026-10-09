@@ -106,13 +106,13 @@ def run_trajectory(viz, model, end_frame_id, q_start, q_end,
     ]
 
     print(f"\n{'='*60}")
-    print(f"  轨迹: {profile.value}  耗时={elapsed:.1f}ms  点数={len(joint_traj)}")
-    print(f"  时长={duration:.2f}s  dt={dt}s  零空间={null_gain}")
-    print(f"  关节: {np.degrees(q_start).round(1).tolist()} → {np.degrees(q_end).round(1).tolist()}")
+    print(f"  Trajectory: {profile.value}  Elapsed={elapsed:.1f}ms  Points={len(joint_traj)}")
+    print(f"  Duration={duration:.2f}s  dt={dt}s  Null-space gain={null_gain}")
+    print(f"  Joints: {np.degrees(q_start).round(1).tolist()} → {np.degrees(q_end).round(1).tolist()}")
     print(f"{'='*60}")
-    print(f"  IK 成功率: {stats.success_rate:.1%}  "
-          f"最大误差: {stats.max_ik_error:.3e}  "
-          f"平均误差: {stats.avg_ik_error:.3e}")
+    print(f"  IK success rate: {stats.success_rate:.1%}  "
+          f"Max error: {stats.max_ik_error:.3e}  "
+          f"Average error: {stats.avg_ik_error:.3e}")
 
     # ── MeshCat 回放 ──
     viz.clear_paths()
@@ -121,7 +121,7 @@ def run_trajectory(viz, model, end_frame_id, q_start, q_end,
         viz.draw_ref_path(ref_positions)
 
     visited = []
-    print("\n  播放动画 (MeshCat)...")
+    print("\n  Playing animation (MeshCat)...")
     for i, pt in enumerate(joint_traj):
         if should_exit:
             break
@@ -131,7 +131,7 @@ def run_trajectory(viz, model, end_frame_id, q_start, q_end,
             viz.draw_actual_path(visited)
         if i < len(times) - 1:
             time.sleep(max(0.002, times[i + 1] - times[i]))
-    print("  动画播放完毕。")
+    print("  Animation finished.")
 
     if not should_exit:
         joint_arr = np.array([pt.q for pt in joint_traj])
@@ -142,14 +142,14 @@ def run_trajectory(viz, model, end_frame_id, q_start, q_end,
         q_deg = np.degrees(joint_arr)
         qv_deg = np.degrees(qv)
 
-        print(f"\n--- 统计摘要 ---")
-        print(f"  关节角度 (deg):")
+        print(f"\n--- Statistics summary ---")
+        print(f"  Joint angles (deg):")
         for i in range(joint_arr.shape[1]):
             print(f"    j{i+1}: [{q_deg[:, i].min():.1f}, {q_deg[:, i].max():.1f}]")
-        print(f"  关节速度 (deg/s):")
+        print(f"  Joint velocities (deg/s):")
         for i in range(joint_arr.shape[1]):
             print(f"    j{i+1}: [{qv_deg[:, i].min():.1f}, {qv_deg[:, i].max():.1f}]")
-        print(f"  笛卡尔误差 (m): avg={cart_errs.mean():.3e}, max={cart_errs.max():.3e}")
+        print(f"  Cartesian error (m): avg={cart_errs.mean():.3e}, max={cart_errs.max():.3e}")
 
     return times, joint_traj, cart_errs, stats
 
@@ -158,19 +158,19 @@ def main():
     global should_exit
     signal.signal(signal.SIGINT, signal_handler)
 
-    print("加载 MeshCat 可视化器...")
+    print("Loading MeshCat visualizer...")
     viz = Visualizer(open_browser=True)
     model = viz.model
     end_frame_id = get_end_effector_frame_id(model)
-    print(f"模型: {model.nq} 关节\n")
+    print(f"Model: {model.nq} joints\n")
 
     ik_params = IKParams(max_iter=200, tolerance=1e-4, damping=1e-6, step_size=0.8)
     dt = 1.0 / 50.0
     q = pin.neutral(model).copy()
     q_last = q.copy()
     viz.update(q)
-    print("已在零位显示机器人，打开 MeshCat 查看。")
-    print('输入: x y z [roll pitch yaw] (米 / 弧度)，q 退出\n')
+    print("Robot displayed at the zero position. Open MeshCat to view it.")
+    print('Input: x y z [roll pitch yaw] (meters / radians), q to exit\n')
 
     while not should_exit:
         T0 = compute_fk(model, q)[2]
@@ -195,7 +195,7 @@ def main():
         try:
             vals = [float(x) for x in parts]
         except ValueError:
-            print("  格式: x y z [roll pitch yaw]")
+            print("  Format: x y z [roll pitch yaw]")
             continue
 
         x, y, z = vals[0], vals[1], vals[2]
@@ -208,7 +208,7 @@ def main():
             model, end_frame_id, target_pose, q_last, ik_params
         )
         if not ik_success:
-            print("  IK 无解\n")
+            print("  No IK solution\n")
             continue
 
         duration = max(1.0, np.linalg.norm(target_pose.translation - T0[:3, 3]) / LINEAR_SPEED)
@@ -220,14 +220,14 @@ def main():
             dt=dt, profile=TrajProfile.MIN_JERK, accel_ratio=0.25, null_gain=0.1,
         )
         ms = (time.time() - t0) * 1000.0
-        print(f"  总耗时: {ms:.1f} ms  点数: {len(joint_traj)}\n")
+        print(f"  Total elapsed: {ms:.1f} ms  Points: {len(joint_traj)}\n")
 
         q_last = joint_traj[-1].q.copy()
         viz.update(q_last)
         q = q_last.copy()
 
     viz.neutral()
-    print("\n完成。")
+    print("\nDone.")
 
 
 if __name__ == "__main__":
